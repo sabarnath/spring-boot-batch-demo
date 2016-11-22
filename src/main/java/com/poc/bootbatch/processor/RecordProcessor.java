@@ -1,7 +1,10 @@
 package com.poc.bootbatch.processor;
 
+import java.util.Random;
+
 import com.poc.bootbatch.model.RecordSO;
 import com.poc.bootbatch.model.WriterSO;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
@@ -14,7 +17,7 @@ public class RecordProcessor implements ItemProcessor<RecordSO, WriterSO> {
     public WriterSO process(RecordSO item) throws Exception {
         LOGGER.info("Processing Record: {}", item);
         WriterSO writerSo = new WriterSO();
-        writerSo.setId(item.getId());
+        writerSo.setId(new Random().nextInt());
         writerSo.setFullName(item.getFirstName() + " " + item.getLastName());
         writerSo.setRandomNum(String.valueOf(Math.random()).substring(3, 8));
         LOGGER.info("Processed Writer: {}", writerSo);

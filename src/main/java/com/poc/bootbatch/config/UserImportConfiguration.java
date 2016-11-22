@@ -1,17 +1,24 @@
 package com.poc.bootbatch.config;
 
-import com.poc.bootbatch.model.RecordSO;
-import com.poc.bootbatch.model.WriterSO;
-import com.poc.bootbatch.processor.RecordProcessor;
+import java.sql.ResultSet;
+import java.util.Date;
+
+import javax.sql.DataSource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.launch.support.SimpleJobLauncher;
+import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
@@ -19,21 +26,74 @@ import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourc
 import org.springframework.batch.item.database.ItemPreparedStatementSetter;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import javax.sql.DataSource;
-import java.sql.ResultSet;
+import com.poc.bootbatch.model.RecordSO;
+import com.poc.bootbatch.model.WriterSO;
+import com.poc.bootbatch.processor.RecordProcessor;
 
 @Configuration
 @EnableBatchProcessing
-public class BatchConfiguration {
+@ConditionalOnProperty(name = "user.job.enabled")
+public class UserImportConfiguration {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BatchConfiguration.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserImportConfiguration.class);
+
+    @Autowired
+    private SimpleJobLauncher jobLauncher;
+
+    @Autowired
+    private JobBuilderFactory jobBuilderFactory;
+
+    @Autowired
+    private StepBuilderFactory stepBuilderFactory;
+    
+    @Autowired
+    private JobExecutionListener listener;
+    
+    @Autowired
+    private DataSource dataSource;
+    
+    public void importUser() throws Exception {
+
+        LOGGER.info("Job Started at :" + new Date());
+
+        JobParameters param = new JobParametersBuilder()
+                .addString("JobID", String.valueOf(System.currentTimeMillis())).toJobParameters();
+
+        JobExecution execution = jobLauncher.run(importUserJob(), param);
+
+        LOGGER.info("Job finished with status :" + execution.getStatus());
+    }
+    
+    @Bean
+    public Job importUserJob() {
+        return jobBuilderFactory.get("importUserJob-include-for-web")
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .flow(importUserStep())
+                .end()
+                .build();
+    }
 
     @Bean
-    public ItemReader<RecordSO> reader(DataSource dataSource) {
+    public Step importUserStep() {
+        TaskletStep step = stepBuilderFactory.get("importUserStep1")
+                .<RecordSO, WriterSO>chunk(5)
+                .reader(reader())
+                .processor(processor())
+                .writer(writer())
+                .build();
+        return step;
+    }
+    
+    
+    @Bean
+    public ItemReader<RecordSO> reader() {
         JdbcCursorItemReader<RecordSO> reader = new JdbcCursorItemReader<>();
         reader.setSql("select id, firstName, lastname, random_num from reader");
         reader.setDataSource(dataSource);
@@ -62,10 +122,10 @@ public class BatchConfiguration {
     }
 
     @Bean
-    public ItemWriter<WriterSO> writer(DataSource dataSource, ItemPreparedStatementSetter<WriterSO> setter) {
+    public ItemWriter<WriterSO> writer() {
         JdbcBatchItemWriter<WriterSO> writer = new JdbcBatchItemWriter<>();
         writer.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>());
-        writer.setItemPreparedStatementSetter(setter);
+        writer.setItemPreparedStatementSetter(setter());
         writer.setSql("insert into writer (id, full_name, random_num) values (?,?,?)");
         writer.setDataSource(dataSource);
         return writer;
@@ -79,30 +139,10 @@ public class BatchConfiguration {
             ps.setString(3, item.getRandomNum());
         };
     }
-
+    
+  
     @Bean
-    public Job importUserJob(JobBuilderFactory jobs, Step s1, JobExecutionListener listener) {
-        return jobs.get("importUserJob")
-                .incrementer(new RunIdIncrementer())
-                .listener(listener)
-                .flow(s1)
-                .end()
-                .build();
-    }
-
-    @Bean
-    public Step step1(StepBuilderFactory stepBuilderFactory, ItemReader<RecordSO> reader,
-                      ItemWriter<WriterSO> writer, ItemProcessor<RecordSO, WriterSO> processor) {
-        return stepBuilderFactory.get("step1")
-                .<RecordSO, WriterSO>chunk(5)
-                .reader(reader)
-                .processor(processor)
-                .writer(writer)
-                .build();
-    }
-
-    @Bean
-    public JdbcTemplate jdbcTemplate(DataSource dataSource) {
+    public JdbcTemplate jdbcTemplate() {
         return new JdbcTemplate(dataSource);
     }
 }
