@@ -38,4 +38,19 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
             }
         }
     }
+    
+    @Override
+    public void beforeJob(JobExecution jobExecution) {
+        log.info("Job Gonna START now .....");
+        log.info("JobConfigurationName :{}",jobExecution.getJobConfigurationName());
+        log.info("JobId : {}", jobExecution.getJobId() );
+        log.info("JobVersion : {}", jobExecution.getVersion());
+        log.info("CreateTime : {}",jobExecution.getCreateTime());
+        log.info("StartTime : {}",jobExecution.getStartTime());
+        log.info("ExitStatus : {}",jobExecution.getExitStatus());
+        log.info("JobParameters : {}",jobExecution.getJobParameters());
+        log.info("LastUpdated : {}",jobExecution.getLastUpdated());
+        log.info("Status : {}",jobExecution.getStatus());
+        log.info("StepExecutions : {}",jobExecution.getStepExecutions());
+    }
 }
