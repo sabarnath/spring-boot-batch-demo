@@ -6,13 +6,13 @@ import javax.sql.DataSource;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
-import org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean;
 import org.springframework.batch.support.DatabaseType;
-import org.springframework.batch.support.transaction.ResourcelessTransactionManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
@@ -65,10 +65,25 @@ public class BatchScheduler {
         return jobRepositoryFactory.getObject();
     }
 
+    /*@Bean
+    public SimpleAsyncTaskExecutor taskExecutor(){
+        SimpleAsyncTaskExecutor simpleAsyncTaskExecutor = new SimpleAsyncTaskExecutor();
+        return simpleAsyncTaskExecutor;
+    }*/
+    
     @Bean
-    public SimpleJobLauncher jobLauncher(JobRepository jobRepository) {
+    public TaskExecutor taskExecutor() {
+        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setMaxPoolSize(4);
+        taskExecutor.afterPropertiesSet();
+        return taskExecutor;
+    }
+    
+    @Bean
+    public SimpleJobLauncher jobLauncher(JobRepository jobRepository, TaskExecutor taskExecutor) {
         SimpleJobLauncher launcher = new SimpleJobLauncher();
         launcher.setJobRepository(jobRepository);
+        launcher.setTaskExecutor(taskExecutor);
         return launcher;
     }
 

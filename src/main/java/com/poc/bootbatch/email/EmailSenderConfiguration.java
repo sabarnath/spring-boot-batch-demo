@@ -73,7 +73,7 @@ public class EmailSenderConfiguration {
         TaskletStep step = stepBuilderFactory.get("emailSenderJobStep").allowStartIfComplete(false)
                 .<List<String>, List<String>>chunk(5)
                 .reader((ItemReader<List<String>>) emailSenderJobReader())
-                .processor((ItemProcessor) emailSenderJobProcessor())
+                .processor((ItemProcessor<? super List<String>, ? extends List<String>>) emailSenderJobProcessor())
                 .writer((ItemWriter<List<String>>) emailSenderJobWriter()).build();
         return step;
     }

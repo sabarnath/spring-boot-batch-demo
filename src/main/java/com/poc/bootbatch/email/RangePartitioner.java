@@ -1,6 +1,8 @@
 package com.poc.bootbatch.email;
 
-
+/**
+ * https://blog.codecentric.de/en/2013/07/spring-batch-2-2-javaconfig-part-6-partitioning-and-multi-threaded-step/
+ */
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,6 +15,7 @@ import org.springframework.batch.item.ExecutionContext;
 public class RangePartitioner implements Partitioner {
     private static final Logger log = LoggerFactory.getLogger(RangePartitioner.class);
 
+    @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
         log.debug("START: Partition");
         Map<String, ExecutionContext> partitionMap = new HashMap<>();
