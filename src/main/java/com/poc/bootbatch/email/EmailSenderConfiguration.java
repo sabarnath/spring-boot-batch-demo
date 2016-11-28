@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.Step;
@@ -42,6 +43,9 @@ public class EmailSenderConfiguration {
 
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
+    
+    @Autowired
+    private JobExecutionListener listener;
 
 
     RangePartitioner rangePartitioner = new RangePartitioner();
@@ -63,7 +67,7 @@ public class EmailSenderConfiguration {
     @Bean
     public Job emailSenderJob() {
         return jobBuilderFactory.get("emailSenderJob").incrementer(new RunIdIncrementer())
-                .listener(listener()).flow(emailSenderJobStep()).end().build();
+                .listener(listener).flow(emailSenderJobStep()).end().build();
     }
 
 
@@ -95,15 +99,5 @@ public class EmailSenderConfiguration {
         return new EmailSenderWriter();
     }
 
-    @Bean
-    public JobNotificationListener listener() {
-        return new JobNotificationListener();
-
-    }
-
-    @Bean
-    public StepNotificationListener stepListener() {
-        return new StepNotificationListener();
-
-    }
+ 
 }

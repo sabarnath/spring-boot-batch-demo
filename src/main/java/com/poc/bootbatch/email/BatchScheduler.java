@@ -10,6 +10,7 @@ import org.springframework.batch.support.DatabaseType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -73,10 +74,11 @@ public class BatchScheduler {
     
     @Bean
     public TaskExecutor taskExecutor() {
-        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.setMaxPoolSize(4);
-        taskExecutor.afterPropertiesSet();
-        return taskExecutor;
+        ThreadPoolTaskExecutor threadExecutor = new ThreadPoolTaskExecutor();
+        threadExecutor.setCorePoolSize(10);
+        threadExecutor.setMaxPoolSize(10);
+        threadExecutor.setAllowCoreThreadTimeOut(true);
+        return threadExecutor;
     }
     
     @Bean
@@ -87,4 +89,20 @@ public class BatchScheduler {
         return launcher;
     }
 
+    @Bean
+    public JobNotificationListener listener() {
+        return new JobNotificationListener();
+
+    }
+
+    @Bean
+    public StepNotificationListener stepListener() {
+        return new StepNotificationListener();
+
+    }
+    
+    @Bean
+    public JdbcTemplate jdbcTemplate(DataSource dataSource) {
+        return new JdbcTemplate(dataSource);
+    }
 }

@@ -10,4 +10,8 @@ INSERT INTO `reader` (`firstName`, `lastName`, `random_num`) VALUES ('def', 'zhu
 INSERT INTO `reader` (`firstName`, `lastName`, `random_num`) VALUES ('dummy', 'name', '3');
 INSERT INTO `reader` (`firstName`, `lastName`, `random_num`) VALUES ('non', 'pay', '4');
 INSERT INTO `reader` (`firstName`, `lastName`, `random_num`) VALUES ('spring', 'batch', '5');
+INSERT INTO `reader` (`firstName`, `lastName`, `random_num`) VALUES ('spring1', 'batch1', '6');
+INSERT INTO `reader` (`firstName`, `lastName`, `random_num`) VALUES ('spring2', 'batch2', '7');
+INSERT INTO `reader` (`firstName`, `lastName`, `random_num`) VALUES ('spring3', 'batch3', '8');
+INSERT INTO `reader` (`firstName`, `lastName`, `random_num`) VALUES ('spring4', 'batch4', '9');
 

@@ -17,7 +17,7 @@ public class RangePartitioner implements Partitioner {
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-        log.debug("START: Partition");
+        log.info("START: Partition");
         Map<String, ExecutionContext> partitionMap = new HashMap<>();
         int startingIndex = 0;
         int endingIndex = 5;
@@ -29,7 +29,7 @@ public class RangePartitioner implements Partitioner {
             endingIndex += 5;
             partitionMap.put("Thread:-" + i, ctxMap);
         }
-        log.debug("END: Created Partitions of size: " + partitionMap.size());
+        log.info("END: Created Partitions of size: " + partitionMap);
         return partitionMap;
     }
 }

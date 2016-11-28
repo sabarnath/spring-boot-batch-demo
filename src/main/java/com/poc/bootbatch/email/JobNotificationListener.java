@@ -14,15 +14,14 @@ public class JobNotificationListener extends JobExecutionListenerSupport {
     @Override
     public void beforeJob(JobExecution jobExecution) {
         if (jobExecution.getStatus() == BatchStatus.STARTED) {
-            log.info("!!! JOB STARTED!");
+            log.info("!!! JOB STARTED! ...job name : {}",jobExecution.getJobInstance());
         }
     }
 
     @Override
     public void afterJob(JobExecution jobExecution) {
         if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
-            log.info("!!! JOB FINISHED! Time to verify the results");
-
+            log.info("!!! JOB FINISHED! Time to verify the results.... job name : {}",jobExecution.getJobInstance());
         }
     }
 }
