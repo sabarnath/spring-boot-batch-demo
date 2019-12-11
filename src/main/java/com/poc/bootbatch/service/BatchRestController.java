@@ -25,6 +25,7 @@ public class BatchRestController {
     @RequestMapping("/hello-world")
     public @ResponseBody String sayHello() {
         _log.info("BatchRestController entered...");
+        System.out.println("test");
         return "Hello All : Welcome to BatchReestController.....:)";
     }
 
